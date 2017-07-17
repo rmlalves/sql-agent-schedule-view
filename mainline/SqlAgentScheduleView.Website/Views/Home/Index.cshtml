@@ -1,0 +1,154 @@
+﻿@model JobScheduleModel
+@{
+    ViewBag.Title = "Job Report Schedule";
+}
+<style>
+    /* hide scheduler footer bar */
+    .k-scheduler-footer {
+        display: none;
+    }
+
+    /* replace the event icon acording to result */
+    .Success .fa-result:before {
+        content: "\f00c";
+        font-family: FontAwesome;
+    }
+
+    .Failed .fa-result:before {
+        content: "\f00d";
+        font-family: FontAwesome;
+    }
+
+    .Running .fa-result:before {
+        content: "\f021";
+        font-family: FontAwesome;
+    }
+
+    /* Style the color of the event text according to result */
+    .Success {
+        height: 100%;
+        color: green;
+        font-weight: bold;
+    }
+
+    .Failed {
+        height: 100%;
+        color: red;
+        font-weight: bold;
+    }
+
+    .Running {
+        height: 100%;
+        color: blue;
+        font-weight: bold;
+    }
+
+    /* Style the color of the table rows according to server */
+    @foreach (var item in Model.JobServerList)
+    {<text>
+    tr.@item.Name {
+        background-color: @item.HtmlColor;
+    }
+    </text>}
+
+</style>
+
+<h1>Servers</h1>
+<div id="server">
+    @foreach (var item in Model.JobServerList)
+    {<text>
+        <span style="color: @item.HtmlColor; font-weight: bold; margin-right: 20px;"><input type="checkbox" checked id="@item.Name" value="@item.Name"> @item.Name</span>
+    </text>}
+</div>
+
+
+<h3>Job Report Schedule</h3>
+<div id="scheduler"></div>
+
+<h3>Job Next Run Date</h3>
+<table id="jobNextRunDateTable" border="1" style="width:100%">
+    <thead>
+        <tr style="background-color: #d3d3d3;">
+            <th>Server</th>
+            <th>Name</th>
+            <th>Start Date</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.JobNextRunDateList.OrderBy(item => item.StartDate))
+        {<text>
+            <tr class="@item.Server">
+                <td style="white-space: nowrap;">@item.Server</td>
+                <td style="white-space: nowrap;">@item.Name</td>
+                <td style="white-space: nowrap;">@item.StartDate.ToString("yyyy/MM/dd HH:mm")</td>
+            </tr>
+        </text>}
+    </tbody>
+</table>
+
+
+@section scripts
+{
+    <script id="event-template" type="text/x-kendo-template">
+        <div class="#: resultStatus #" title="(#: kendo.toString(start, " hh:mm") # - #: kendo.toString(end, "hh:mm" ) #): #: title # - #: errorMessage #">
+            <div class="k-event-template k-event-time">#: kendo.toString(start, "hh:mm") # - #: kendo.toString(end, "hh:mm") #</div>
+            <div class="k-event-template"><i class="fa fa-result"></i> #: resultStatus # - #: title #</div>
+        </div>
+    </script>
+
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $("#server :checkbox").change(function (e) {
+                var checked = $.map($("#server :checked"), function (checkbox) {
+                    return $(checkbox).val();
+                });
+
+                $("#scheduler").data("kendoScheduler").dataSource.filter({
+                    operator: function (task) {
+                        return $.inArray(task.server, checked) >= 0;
+                    }
+                });
+
+                $("#jobNextRunDateTable tbody tr").hide();
+                $.each(checked, function (index, value) {
+                    $("#jobNextRunDateTable tr." + value).show();
+                });
+            });
+
+            $("#scheduler").kendoScheduler({
+                date: new Date("@DateTime.Now.ToString("yyyy/MM/dd")"),
+                editable: false,
+                eventTemplate: $("#event-template").html(),
+                views: [
+                    { type: "day", selected: true },
+                    "week",
+                    "agenda",
+                    { type: "timeline", eventHeight: 50 }
+                ],
+                dataSource: [
+                    @foreach (var item in Model.JobResultList)
+                    {<text>
+                    {
+                        server: "@item.Server",
+                        title: "@item.Name",
+                        start: new Date("@item.StartDate.ToString("yyyy/MM/dd HH:mm:ss")"),
+                        end: new Date("@(item.EndDate?.ToString("yyyy/MM/dd HH:mm:ss"))"),
+                        resultStatus: "@item.ResultStatus",
+                        errorMessage: "@item.ErrorMessage",
+                    },
+                    </text>}
+
+                ],
+                resources: [{
+                    field: "server",
+                    dataSource: [
+                        @foreach (var item in Model.JobServerList)
+                        {<text>
+                        { text: "@item.Name", value: "@item.Name", color: "@item.HtmlColor" },
+                        </text>}
+                    ]
+                }]
+            });
+        });
+    </script>
+}
