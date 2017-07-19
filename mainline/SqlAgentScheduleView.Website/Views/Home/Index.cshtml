@@ -90,7 +90,7 @@
 @section scripts
 {
     <script id="event-template" type="text/x-kendo-template">
-        <div class="#: resultStatus #" title="(#: kendo.toString(start, " hh:mm") # - #: kendo.toString(end, "hh:mm" ) #): #: title # - #: errorMessage #">
+        <div class="#: resultStatus #" title="(#: kendo.toString(start, " hh:mm") # - #: kendo.toString(end, "hh:mm" ) #): #: title # - #: resultMessage #">
             <div class="k-event-template k-event-time">#: kendo.toString(start, "hh:mm") # - #: kendo.toString(end, "hh:mm") #</div>
             <div class="k-event-template"><i class="fa fa-result"></i> #: resultStatus # - #: title #</div>
         </div>
@@ -134,7 +134,7 @@
                         start: new Date("@item.StartDate.ToString("yyyy/MM/dd HH:mm:ss")"),
                         end: new Date("@(item.EndDate?.ToString("yyyy/MM/dd HH:mm:ss"))"),
                         resultStatus: "@item.ResultStatus",
-                        errorMessage: "@item.ErrorMessage",
+                        resultMessage: "@item.ResultMessage",
                     },
                     </text>}
 

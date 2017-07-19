@@ -47,7 +47,7 @@ SELECT
         WHEN sysjobservers.last_run_outcome = 4 THEN 'Running'
         ELSE 'Others (' + CAST(sysjobservers.last_run_outcome AS VARCHAR) + ')'
     END AS ResultStatus
-    ,sysjobservers.last_outcome_message AS ErrorMessage
+    ,sysjobservers.last_outcome_message AS ResultMessage
 FROM msdb.dbo.sysjobs
 INNER JOIN msdb.dbo.sysjobservers ON (sysjobservers.job_id = sysjobs.job_id)
 WHERE sysjobs.name = @jobName
@@ -106,7 +106,7 @@ SELECT
         WHEN sysjobhistory.run_status = 4 THEN 'Running'
         ELSE 'Others (' + CAST(sysjobhistory.run_status AS VARCHAR) + ')'
     END AS ResultStatus
-    ,sysjobhistory.[message] AS ErrorMessage
+    ,sysjobhistory.[message] AS ResultMessage
 FROM msdb.dbo.sysjobs
 INNER JOIN msdb.dbo.sysjobhistory ON (sysjobhistory.job_id = sysjobs.job_id)
 WHERE sysjobhistory.step_id = 0 -- GET JOB RESULT
@@ -121,7 +121,7 @@ SELECT
     ,GETDATE() AS EndDate
     ,DATEDIFF(SECOND, sysjobactivity.start_execution_date, GETDATE()) AS Duration
     ,'Running' AS ResultStatus
-    ,'The job is running...' AS ErrorMessage
+    ,'The job is running...' AS ResultMessage
 FROM msdb.dbo.sysjobs
 INNER JOIN msdb.dbo.sysjobactivity ON (sysjobactivity.job_id = sysjobs.job_id)
 WHERE sysjobactivity.job_history_id IS NULL

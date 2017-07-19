@@ -16,6 +16,6 @@ namespace SqlAgentScheduleView.Data
         public DateTime? EndDate { get; set; }
         public double Duration { get; set; }
         public string ResultStatus { get; set; }
-        public string ErrorMessage { get; set; }
+        public string ResultMessage { get; set; }
     }
 }
